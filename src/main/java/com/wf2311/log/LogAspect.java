@@ -1,47 +1,45 @@
 package com.wf2311.log;
 
-import com.alibaba.fastjson.JSONObject;
 import com.wf2311.log.annotation.Log;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.time.temporal.ChronoUnit.NANOS;
 
 /**
  * 日志切面处理类
  *
  * @author wf2311
- * @date 2016 /06/03 17:11.
+ * @date 2016/06/03 17:11.
  */
 @Aspect //声明这是一个组件
 @Component  //声明这是一个切面Bean
 public class LogAspect {
-    private Logger logger = LoggerFactory.getLogger(LogAspect.class);
-
     /**
      * 方法开始执行时间
      */
-    private Date startTime;
+    private LocalDateTime startTime;
     /**
      * 方法执行结束时间
      */
-    private Date endTime;
+    private LocalDateTime endTime;
 
     /**
      * 日志切入点
      */
-    @Autowired
+    @Resource
     private Record record;
 
     private LogInfo logInfo;
@@ -67,7 +65,7 @@ public class LogAspect {
      */
     @Before("aspect()")
     public void before(JoinPoint joinPoint) {
-        logger.info("before " + joinPoint);
+//        logger.info("before " + joinPoint);
     }
 
     /**
@@ -77,8 +75,8 @@ public class LogAspect {
      */
     @After("aspect()")
     public void after(JoinPoint joinPoint) {
-        logger.info("after " + joinPoint);
-        endTime = Calendar.getInstance().getTime();
+//        logger.info("after " + joinPoint);
+        endTime = LocalDateTime.now();
     }
 
 
@@ -97,7 +95,7 @@ public class LogAspect {
     @Around("aspect()&&@annotation(log)")
     public Object around(ProceedingJoinPoint joinPoint, Log log) throws Throwable {
         init();
-        startTime = Calendar.getInstance().getTime();
+        startTime = LocalDateTime.now();
         invoke(joinPoint, log);
         /**
          * 方法执行
@@ -107,14 +105,12 @@ public class LogAspect {
 
     /**
      * 配置后置返回通知,使用在方法aspect()上注册的切入点
-     *
-     * @param joinPoint the join point
      */
     @AfterReturning("aspect()")
     public void afterReturn(JoinPoint joinPoint) {
-        logInfo.setType(Grade.NORMAL.ordinal());
-        logger.info("afterReturn " + joinPoint);
-        endTime = new Date();
+        logInfo.setType(Type.NORMAL.ordinal());
+//        logger.info("afterReturn " + joinPoint);
+        endTime = LocalDateTime.now();
         saveLog();
     }
 
@@ -127,10 +123,10 @@ public class LogAspect {
      */
     @AfterThrowing(pointcut = "aspect()", throwing = "e")
     public void afterThrow(JoinPoint joinPoint, Exception e) {
-        logger.info("afterThrow " + joinPoint + "\t" + e.getMessage());
-        logInfo.setType(Grade.EXCEPTION.ordinal());
+//        logger.info("afterThrow " + joinPoint + "\t" + e.getMessage());
+        logInfo.setType(Type.EXCEPTION.ordinal());
         logInfo.setExceptionCode(e.getClass().getName());
-        endTime = Calendar.getInstance().getTime();
+        endTime = LocalDateTime.now();
         saveLog();
     }
 
@@ -162,7 +158,7 @@ public class LogAspect {
      * @param joinPoint
      */
     private void invoke(ProceedingJoinPoint joinPoint, Log log) {
-        logger.info("around " + joinPoint);
+//        logger.info("around " + joinPoint);
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
@@ -175,35 +171,35 @@ public class LogAspect {
             e.printStackTrace();
         }
         //请求的IP
-        String ip = IpUtils.getIpAddr(request);
+        String ip = IpUtil.getIpAddr(request);
         //获取参数列表
         logInfo.setIp(ip);
         logInfo.setMethod(clazz.getName() + "." + method.getName() + "()");
-        logInfo.setParams(paramsJson(method, joinPoint));
+        logInfo.setParams(paramsMap(method, joinPoint));
     }
 
-    private String paramsJson(Method method, ProceedingJoinPoint joinPoint) {
-        return paramsJson(method, null, joinPoint);
+    private Object paramsMap(Method method, ProceedingJoinPoint joinPoint) {
+        return paramsMap(method, null, joinPoint);
     }
 
-    private String paramsJson(Method method, Class clazz, ProceedingJoinPoint joinPoint) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("type", method.getParameterTypes());
+    private Object paramsMap(Method method, Class clazz, ProceedingJoinPoint joinPoint) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("type", method.getParameterTypes());
 //        try {
 //            jsonObject.put("name", ReflectUtils.getInstance().getMethodParameterNames(method.getName(), clazz, method.getParameterTypes()));
 //        } catch (Exception e) {
 //            jsonObject.put("name", "UNKNOWN");
 //        }
-        jsonObject.put("value", joinPoint.getArgs());
+        params.put("value", joinPoint.getArgs());
 
-        return JSONObject.toJSONString(jsonObject);
+        return params;
     }
 
     /**
      * 保存日志信息到数据库
      */
     private void saveLog() {
-        logInfo.setCreated(Calendar.getInstance().getTime());
+        logInfo.setCreated(LocalDateTime.now());
         logInfo.setStartTime(startTime);
         logInfo.setEndTime(endTime);
         logInfo.setSpend(spendTime());
@@ -212,20 +208,16 @@ public class LogAspect {
 
     /**
      * 计算方法调用花费时间
-     *
-     * @return
      */
     private long spendTime() {
-        return endTime.getTime() - startTime.getTime();
+        return endTime.until(startTime, NANOS);
     }
 
-    /**
-     * Sets record.
-     *
-     * @param record the record
-     */
-    public void setRecord(Record record) {
-        this.record = record;
-    }
+//    /**
+//     * 设置日志信息
+//     */
+//    public void setRecord(Record record) {
+//        this.record = record;
+//    }
 
 }

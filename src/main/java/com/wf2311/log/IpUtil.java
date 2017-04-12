@@ -8,11 +8,9 @@ import java.net.UnknownHostException;
  * @author wf2311
  * @time 2016/12/5 16:42.
  */
-public class IpUtils {
+public class IpUtil {
     /**
      * 获取当前网络ip
-     *
-     * @return
      */
     public static String getIpAddr(HttpServletRequest request) {
         String ipAddress = request.getHeader("x-forwarded-for");

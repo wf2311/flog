@@ -1,29 +1,29 @@
 package com.wf2311.log.annotation;
 
-import com.wf2311.log.Grade;
+import com.wf2311.log.Type;
 
 import java.lang.annotation.*;
 
 /**
- * The interface Log.
+ * 日志注解
  *
  * @author wf2311
- * @date 2016 /06/03 16:59.
+ * @date 2016/06/03 16:59.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Log {
 
-
+    /**
+     * 名称
+     */
     String value() default "";
 
     /**
-     * 认真类型
-     *
-     * @return
+     * 日志等级
      */
-    Grade grade() default Grade.NORMAL;
+    Type grade() default Type.NORMAL;
 
 
 }
