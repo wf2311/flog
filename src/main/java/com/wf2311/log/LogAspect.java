@@ -210,14 +210,7 @@ public class LogAspect {
      * 计算方法调用花费时间
      */
     private long spendTime() {
-        return endTime.until(startTime, NANOS);
+        return startTime.until(endTime, NANOS);
     }
-
-//    /**
-//     * 设置日志信息
-//     */
-//    public void setRecord(Record record) {
-//        this.record = record;
-//    }
 
 }
