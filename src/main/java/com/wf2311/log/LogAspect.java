@@ -8,13 +8,13 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartRequest;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static java.time.temporal.ChronoUnit.NANOS;
 
@@ -24,9 +24,7 @@ import static java.time.temporal.ChronoUnit.NANOS;
  * @author wf2311
  * @date 2016/06/03 17:11.
  */
-@Aspect //声明这是一个组件
-@Component  //声明这是一个切面Bean
-public class LogAspect {
+public abstract class LogAspect {
     /**
      * 方法开始执行时间
      */
@@ -42,7 +40,9 @@ public class LogAspect {
     @Resource
     private Record record;
 
-    private LogInfo logInfo;
+    protected LogInfo logInfo;
+
+    protected Method method;
 
     private void init() {
         logInfo = new LogInfo();
@@ -50,11 +50,30 @@ public class LogAspect {
         endTime = null;
     }
 
+    protected boolean guessLevel = true;
+
+    /**
+     * 忽略条件，优先级高于{@code accept()}
+     * <p>
+     * //FIXME 重写此方法后,无法直接传递给父类的hit()方法
+     */
+    @Pointcut("@annotation(com.wf2311.log.annotation.LogIgnore)")
+    public void ignore() {
+    }
+
+    /**
+     * 接受条件,优先级低于{@code ignore()}
+     * //FIXME 重写此方法后,无法直接传递给父类的hit()方法
+     */
+    @Pointcut("@annotation(com.wf2311.log.annotation.Log))")
+    public void accept() {
+    }
+
     /**
      * 配置切入点,该方法无方法体,主要为方便同类中其他方法使用此处配置的切入点
      */
-    @Pointcut("@annotation(com.wf2311.log.annotation.Log))")
-    public void aspect() {
+    @Pointcut("accept()&&!ignore()")
+    protected void hit() {
     }
 
     /**
@@ -63,7 +82,7 @@ public class LogAspect {
      *
      * @param joinPoint the join point
      */
-    @Before("aspect()")
+    @Before("hit()")
     public void before(JoinPoint joinPoint) {
 //        logger.info("before " + joinPoint);
     }
@@ -73,7 +92,7 @@ public class LogAspect {
      *
      * @param joinPoint the join point
      */
-    @After("aspect()")
+    @After("hit()")
     public void after(JoinPoint joinPoint) {
 //        logger.info("after " + joinPoint);
         endTime = LocalDateTime.now();
@@ -92,7 +111,7 @@ public class LogAspect {
      * @return 方法执行结果 object
      * @throws Throwable 调用出错
      */
-    @Around("aspect()&&@annotation(log)")
+    @Around("hit()&&@annotation(log)")
     public Object around(ProceedingJoinPoint joinPoint, Log log) throws Throwable {
         init();
         startTime = LocalDateTime.now();
@@ -103,13 +122,17 @@ public class LogAspect {
         return joinPoint.proceed(joinPoint.getArgs());
     }
 
+    @Around("hit()")
+    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+        return around(joinPoint, null);
+    }
+
     /**
      * 配置后置返回通知,使用在方法aspect()上注册的切入点
      */
-    @AfterReturning("aspect()")
+    @AfterReturning("hit()")
     public void afterReturn(JoinPoint joinPoint) {
-        logInfo.setType(Type.NORMAL.ordinal());
-//        logger.info("afterReturn " + joinPoint);
+        logInfo.setType(Type.NORMAL);
         endTime = LocalDateTime.now();
         saveLog();
     }
@@ -117,15 +140,16 @@ public class LogAspect {
 
     /**
      * After throw.
-     *
-     * @param joinPoint the join point
-     * @param e         the e
      */
-    @AfterThrowing(pointcut = "aspect()", throwing = "e")
+    @AfterThrowing(pointcut = "hit()", throwing = "e")
     public void afterThrow(JoinPoint joinPoint, Exception e) {
-//        logger.info("afterThrow " + joinPoint + "\t" + e.getMessage());
-        logInfo.setType(Type.EXCEPTION.ordinal());
+        logInfo.setType(Type.EXCEPTION);
         logInfo.setExceptionCode(e.getClass().getName());
+        logInfo.setExceptionDetail(e.getMessage());
+
+        setSpecifiedLevelException(e);
+        validateIgnoreException(e);
+
         endTime = LocalDateTime.now();
         saveLog();
     }
@@ -158,12 +182,17 @@ public class LogAspect {
      * @param joinPoint
      */
     private void invoke(ProceedingJoinPoint joinPoint, Log log) {
-//        logger.info("around " + joinPoint);
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
-        logInfo.setGrade(log.grade().ordinal());
-        logInfo.setDescription(log.value());
+
+        this.method = method;
+
+        if (log != null) {
+            logInfo.setLevel(log.level());
+            logInfo.setDescription(log.value());
+        }
+        logInfo.setHttpMethod(request.getMethod());
         Class clazz = null;
         try {
             clazz = Class.forName(joinPoint.getSignature().getDeclaringTypeName());
@@ -176,6 +205,9 @@ public class LogAspect {
         logInfo.setIp(ip);
         logInfo.setMethod(clazz.getName() + "." + method.getName() + "()");
         logInfo.setParams(paramsMap(method, joinPoint));
+        if (guessLevel) {
+            logInfo.setLevel(GuessLevel.guess(method.getName()).toString());
+        }
     }
 
     private Object paramsMap(Method method, ProceedingJoinPoint joinPoint) {
@@ -185,14 +217,32 @@ public class LogAspect {
     private Object paramsMap(Method method, Class clazz, ProceedingJoinPoint joinPoint) {
         Map<String, Object> params = new HashMap<>();
         params.put("type", method.getParameterTypes());
-//        try {
-//            jsonObject.put("name", ReflectUtils.getInstance().getMethodParameterNames(method.getName(), clazz, method.getParameterTypes()));
-//        } catch (Exception e) {
-//            jsonObject.put("name", "UNKNOWN");
-//        }
-        params.put("value", joinPoint.getArgs());
+        try {
+            params.put("value", resolveArgs(joinPoint.getArgs()));
+        } catch (Exception e) {
+            params.put("value", "UNKNOWN");
+        }
 
         return params;
+    }
+
+    protected List resolveArgs(Object[] args) {
+        if (args == null || args.length == 0) {
+            return Arrays.asList(args);
+        }
+
+        List<Object> list = new ArrayList<>();
+        for (Object arg : args) {
+            list.add(resolveArg(arg));
+        }
+        return list;
+    }
+
+    private Object resolveArg(Object arg) {
+        if (arg instanceof MultipartRequest) {
+            return ((MultipartRequest) arg).getFileNames();
+        }
+        return arg;
     }
 
     /**
@@ -203,6 +253,7 @@ public class LogAspect {
         logInfo.setStartTime(startTime);
         logInfo.setEndTime(endTime);
         logInfo.setSpend(spendTime());
+        modifyLogInfo();
         record.saveLog(logInfo);
     }
 
@@ -211,6 +262,50 @@ public class LogAspect {
      */
     private long spendTime() {
         return startTime.until(endTime, NANOS);
+    }
+
+    /**
+     * 修记录信息
+     */
+    public abstract void modifyLogInfo();
+
+
+    /**
+     * 要排除为异常类型的异常
+     */
+    public abstract List<ExceptionLevel> ignoreExceptions();
+
+    /**
+     * 要指定为特别等级的异常
+     */
+    public abstract List<ExceptionLevel> specifiedLevelExceptions();
+
+    private void validateIgnoreException(Exception e) {
+        ExceptionLevel level = searchFromExceptionLevel(ignoreExceptions(), e);
+        if (level != null) {
+            logInfo.setLevel(level.getLevel());
+            logInfo.setType(Type.NORMAL);
+        }
+    }
+
+    private void setSpecifiedLevelException(Exception e) {
+        ExceptionLevel level = searchFromExceptionLevel(specifiedLevelExceptions(), e);
+        if (level != null) {
+            logInfo.setLevel(level.getLevel());
+        }
+    }
+
+    private ExceptionLevel searchFromExceptionLevel(List<ExceptionLevel> exceptionLevels, Exception e) {
+        if (exceptionLevels == null || exceptionLevels.size() == 0) {
+            return null;
+        }
+        for (ExceptionLevel level : exceptionLevels) {
+            Class<? extends Exception> exceptionType = level.getException();
+            if (e.getClass().equals(exceptionType)) {
+                return level;
+            }
+        }
+        return null;
     }
 
 }

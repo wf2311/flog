@@ -23,7 +23,7 @@ public @interface Log {
     /**
      * 日志等级
      */
-    Type grade() default Type.NORMAL;
+    String level() default "";
 
 
 }

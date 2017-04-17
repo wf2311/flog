@@ -2,7 +2,6 @@ package com.wf2311.log;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 /**
  * 日志信息
@@ -36,12 +35,12 @@ public class LogInfo implements Serializable {
     /**
      * 运行结果类型(正常执行/发生异常)
      */
-    private int type;
+    private Type type;
 
     /**
      * 日志级别
      */
-    private int grade;
+    private String level;
     /**
      * 调用方法时的参数相关信息
      */
@@ -117,20 +116,20 @@ public class LogInfo implements Serializable {
         this.method = method;
     }
 
-    public int getType() {
+    public Type getType() {
         return type;
     }
 
-    public void setType(int type) {
+    public void setType(Type type) {
         this.type = type;
     }
 
-    public int getGrade() {
-        return grade;
+    public String getLevel() {
+        return level;
     }
 
-    public void setGrade(int grade) {
-        this.grade = grade;
+    public void setLevel(String level) {
+        this.level = level;
     }
 
     public Object getParams() {

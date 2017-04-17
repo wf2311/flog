@@ -11,8 +11,6 @@ public interface Record {
 
     /**
      * 保存日志信息
-     *
-     * @param info 日志信息
      */
     void saveLog(LogInfo info);
 }
