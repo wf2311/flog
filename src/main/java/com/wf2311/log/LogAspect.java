@@ -204,7 +204,11 @@ public abstract class LogAspect {
         //获取参数列表
         logInfo.setIp(ip);
         logInfo.setMethod(clazz.getName() + "." + method.getName() + "()");
-        logInfo.setParams(paramsMap(method, joinPoint));
+        if (request.getParameterMap() != null) {
+            logInfo.setParams(request.getParameterMap());
+        } else {
+            logInfo.setParams(paramsMap(method, joinPoint));
+        }
         if (guessLevel) {
             logInfo.setLevel(GuessLevel.guess(method.getName()).toString());
         }

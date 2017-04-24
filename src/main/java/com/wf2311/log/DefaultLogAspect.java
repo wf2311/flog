@@ -9,9 +9,9 @@ import java.util.List;
  * @author wangfeng
  * @time 2017/04/17 13:03.
  */
-@Aspect //声明这是一个组件
-@Component  //声明这是一个切面Bean
-public class DefalutLogAspect extends LogAspect {
+//@Aspect //声明这是一个组件
+//@Component  //声明这是一个切面Bean
+public class DefaultLogAspect extends LogAspect {
     /**
      * 修记录信息
      */
