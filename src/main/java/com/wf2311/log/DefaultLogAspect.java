@@ -1,16 +1,12 @@
 package com.wf2311.log;
 
-import org.aspectj.lang.annotation.Aspect;
-import org.springframework.stereotype.Component;
-
+import java.util.Collections;
 import java.util.List;
 
 /**
  * @author wangfeng
  * @time 2017/04/17 13:03.
  */
-//@Aspect //声明这是一个组件
-//@Component  //声明这是一个切面Bean
 public class DefaultLogAspect extends LogAspect {
     /**
      * 修记录信息
@@ -24,7 +20,7 @@ public class DefaultLogAspect extends LogAspect {
      */
     @Override
     public List<ExceptionLevel> ignoreExceptions() {
-        return null;
+        return Collections.emptyList();
     }
 
     /**
@@ -32,6 +28,6 @@ public class DefaultLogAspect extends LogAspect {
      */
     @Override
     public List<ExceptionLevel> specifiedLevelExceptions() {
-        return null;
+        return Collections.emptyList();
     }
 }
