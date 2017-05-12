@@ -6,7 +6,7 @@
 
     <groupId>com.wf2311</groupId>
     <artifactId>flog</artifactId>
-    <version>0.3.1</version>
+    <version>${p.version}</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -17,6 +17,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- 编译时的编码 -->
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+        <p.version>0.3.3</p.version>
     </properties>
     <!--mvn deploy -DaltDeploymentRepository=wf2311-mvn-repo::default::file:D:/Projects/open-source/maven-repo/repository/-->
     <dependencies>
@@ -76,6 +77,12 @@
                     </execution>
                 </executions>
                 <version>3.0.0</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.2</version>
             </plugin>
 
         </plugins>

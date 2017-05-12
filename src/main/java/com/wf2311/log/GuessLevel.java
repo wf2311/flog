@@ -1,3 +1,4 @@
+/**/
 package com.wf2311.log;
 
 import java.util.Arrays;
