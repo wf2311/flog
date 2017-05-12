@@ -61,11 +61,11 @@ public class LogInfo implements Serializable {
     /**
      * 接口调用开始时间
      */
-    private LocalDateTime startTime;
+    private transient LocalDateTime startTime;
     /**
      * 接口调用结束时间
      */
-    private LocalDateTime endTime;
+    private transient LocalDateTime endTime;
     /**
      * 接口调用花费用时(nanos)
      */
@@ -75,6 +75,11 @@ public class LogInfo implements Serializable {
      * 请求方式(GET、POST、PUT、DELETE)
      */
     private String httpMethod;
+
+    /**
+     * 请求的url
+     */
+    private String url;
 
     public LocalDateTime getCreated() {
         return created;
@@ -194,5 +199,13 @@ public class LogInfo implements Serializable {
 
     public void setHttpMethod(String httpMethod) {
         this.httpMethod = httpMethod;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

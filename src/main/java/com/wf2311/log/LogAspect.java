@@ -192,18 +192,19 @@ public abstract class LogAspect {
             logInfo.setLevel(log.level());
             logInfo.setDescription(log.value());
         }
-        logInfo.setHttpMethod(request.getMethod());
         Class clazz = null;
         try {
             clazz = Class.forName(joinPoint.getSignature().getDeclaringTypeName());
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        logInfo.setHttpMethod(request.getMethod());
         //请求的IP
         String ip = IpUtil.getIpAddr(request);
         //获取参数列表
         logInfo.setIp(ip);
         logInfo.setMethod(clazz.getName() + "." + method.getName() + "()");
+        logInfo.setUrl(request.getRequestURI());
         if (request.getParameterMap() != null) {
             logInfo.setParams(request.getParameterMap());
         } else {
@@ -218,12 +219,13 @@ public abstract class LogAspect {
         return paramsMap(method, null, joinPoint);
     }
 
+
     private Object paramsMap(Method method, Class clazz, ProceedingJoinPoint joinPoint) {
         Map<String, Object> params = new HashMap<>();
         params.put("type", method.getParameterTypes());
         try {
             params.put("value", resolveArgs(joinPoint.getArgs()));
-        } catch (Exception e) {
+        } catch (Exception ignore) {
             params.put("value", "UNKNOWN");
         }
 
@@ -232,7 +234,7 @@ public abstract class LogAspect {
 
     protected List resolveArgs(Object[] args) {
         if (args == null || args.length == 0) {
-            return Arrays.asList(args);
+            return Collections.EMPTY_LIST;
         }
 
         List<Object> list = new ArrayList<>();
