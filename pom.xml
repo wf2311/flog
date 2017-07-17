@@ -6,7 +6,48 @@
 
     <groupId>com.wf2311</groupId>
     <artifactId>flog</artifactId>
-    <version>${p.version}</version>
+    <version>0.1.0</version>
+
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>java web log</description>
+    <url>https://github.com/wf2311/flog</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>wf2311</name>
+            <email>wf2311@163.com</email>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+8</timezone>
+            <organization>wf2311</organization>
+            <organizationUrl>http://www.wf2311.com</organizationUrl>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:https://github.com/wf2311/flog.git</connection>
+        <developerConnection>scm:git:https://github.com/wf2311/flog.git</developerConnection>
+        <url>https://github.com/wf2311/flog</url>
+        <tag>v${project.version}</tag>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <name>Maven Central Staging Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -17,7 +58,6 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- 编译时的编码 -->
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
-        <p.version>0.3.3</p.version>
     </properties>
     <!--mvn deploy -DaltDeploymentRepository=wf2311-mvn-repo::default::file:D:/Projects/open-source/maven-repo/repository/-->
     <dependencies>
@@ -46,14 +86,14 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
+            <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-surefire-plugin</artifactId>-->
+            <!--<version>2.19.1</version>-->
+            <!--<configuration>-->
+            <!--<skip>true</skip>-->
+            <!--</configuration>-->
+            <!--</plugin>-->
             <!-- 编译插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -61,6 +101,7 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <encoding>utf-8</encoding>
                 </configuration>
                 <version>3.5.1</version>
             </plugin>
@@ -78,13 +119,35 @@
                 </executions>
                 <version>3.0.0</version>
             </plugin>
-
             <plugin>
-                <groupId>org.sonarsource.scanner.maven</groupId>
-                <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.2</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <encoding>utf-8</encoding>
+                </configuration>
             </plugin>
+            <!--<plugin>-->
+            <!--<groupId>org.sonarsource.scanner.maven</groupId>-->
+            <!--<artifactId>sonar-maven-plugin</artifactId>-->
+            <!--<version>3.2</version>-->
+            <!--</plugin>-->
 
+            <!--GPG自动签名的插件-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
