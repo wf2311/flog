@@ -207,7 +207,8 @@ public abstract class LogAspect {
         logInfo.setIp(ip);
         logInfo.setMethod(clazz.getName() + "." + method.getName() + "()");
         logInfo.setUrl(request.getRequestURI());
-        if (request.getParameterMap() != null) {
+        //FIXME 逻辑需要优化
+        if (request.getParameterMap() != null && request.getParameterMap().size() > 0) {
             logInfo.setParams(request.getParameterMap());
         } else {
             logInfo.setParams(paramsMap(method, joinPoint));
