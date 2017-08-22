@@ -1,5 +1,7 @@
 package com.wf2311.log;
 
+import com.wf2311.log.annotation.Log;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -15,9 +17,12 @@ public class LogInfo implements Serializable {
      */
     private LocalDateTime created;
     /**
-     * 创建者(json字符串)
+     * 创建者
      */
     private String creator;
+
+
+    private Object userInfo;
 
     /**
      * 主键
@@ -80,6 +85,13 @@ public class LogInfo implements Serializable {
      * 请求的url
      */
     private String url;
+
+    /**
+     * 额外的日志参数
+     *
+     * @see Log#params()
+     */
+    private String[] logParams;
 
     public LocalDateTime getCreated() {
         return created;
@@ -207,5 +219,21 @@ public class LogInfo implements Serializable {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public Object getUserInfo() {
+        return userInfo;
+    }
+
+    public void setUserInfo(Object userInfo) {
+        this.userInfo = userInfo;
+    }
+
+    public String[] getLogParams() {
+        return logParams;
+    }
+
+    public void setLogParams(String[] logParams) {
+        this.logParams = logParams;
     }
 }

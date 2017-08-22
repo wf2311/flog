@@ -44,10 +44,13 @@ public abstract class LogAspect {
 
     protected Method method;
 
+    protected HttpServletRequest request;
+
     private void init() {
         logInfo = new LogInfo();
         startTime = null;
         endTime = null;
+        this.request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
     }
 
     protected boolean guessLevel = true;
@@ -84,7 +87,6 @@ public abstract class LogAspect {
      */
     @Before("hit()")
     public void before(JoinPoint joinPoint) {
-//        logger.info("before " + joinPoint);
     }
 
     /**
@@ -94,7 +96,6 @@ public abstract class LogAspect {
      */
     @After("hit()")
     public void after(JoinPoint joinPoint) {
-//        logger.info("after " + joinPoint);
         endTime = LocalDateTime.now();
     }
 
@@ -182,7 +183,7 @@ public abstract class LogAspect {
      * @param joinPoint
      */
     private void invoke(ProceedingJoinPoint joinPoint, Log log) {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
 
@@ -191,6 +192,7 @@ public abstract class LogAspect {
         if (log != null) {
             logInfo.setLevel(log.level());
             logInfo.setDescription(log.value());
+            logInfo.setLogParams(log.params());
         }
         Class clazz = null;
         try {

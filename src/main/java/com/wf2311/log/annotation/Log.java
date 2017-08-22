@@ -1,14 +1,12 @@
 package com.wf2311.log.annotation;
 
-import com.wf2311.log.Type;
-
 import java.lang.annotation.*;
 
 /**
  * 日志注解
  *
  * @author wf2311
- * @date 2016/06/03 16:59.
+ * @time 2016/06/03 16:59.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -25,5 +23,13 @@ public @interface Log {
      */
     String level() default "";
 
+    /**
+     * 要求用户处于登录状态
+     */
+    boolean login() default true;
 
+    /**
+     * 额外的参数
+     */
+    String[] params() default "";
 }

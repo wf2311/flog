@@ -6,7 +6,7 @@
 
     <groupId>com.wf2311</groupId>
     <artifactId>flog</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>java web log</description>
@@ -141,6 +141,22 @@
                         <configuration>
                             <additionalparam>-Xdoclint:none</additionalparam>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--GPG自动签名的插件-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
