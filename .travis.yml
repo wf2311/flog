@@ -1,0 +1,11 @@
+language: java
+
+# Test several JDK
+jdk:
+  - openjdk8
+
+# Remove all the bla-bla...
+script:
+  - mvn clean install -q
+
+
