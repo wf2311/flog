@@ -167,14 +167,9 @@ public abstract class LogAspect {
          * 获取目标类的所有方法，找到当前要执行的方法
          */
         Method[] methods = joinPoint.getTarget().getClass().getMethods();
-        Method resultMethod = null;
-        for (Method method : methods) {
-            if (method.getName().equals(methodName)) {
-                resultMethod = method;
-                break;
-            }
-        }
-        return resultMethod;
+        return Arrays.stream(methods)
+                .filter(m -> m.getName().equals(methodName))
+                .findFirst().orElse(null);
     }
 
     /**
