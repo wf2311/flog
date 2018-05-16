@@ -10,6 +10,8 @@ before_deploy:
 before_install:
   - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
   - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+install:
+  - mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dadditionalparam=-Xdoclint:none -Dmaven.javadoc.skip=true -B -V
 script: ./deloy_flog.sh && ./.deloy_stater_flog.sh
 env:
   global:
