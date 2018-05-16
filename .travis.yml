@@ -12,7 +12,10 @@ before_install:
   - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 install:
   - mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dadditionalparam=-Xdoclint:none -Dmaven.javadoc.skip=true -B -V
-script: ./.deloy_flog.sh && ./.deloy_stater_flog.sh
+script:
+  - mvn clean deploy --settings .maven.xml -DskipTests=true -Dadditionalparam=-Xdoclint:none -Dmaven.javadoc.skip=true -B -U -Prelease
+  - ./spring-boot-starter-flog/
+  - mvn clean deploy --settings ../.maven.xml -DskipTests=true -Dadditionalparam=-Xdoclint:none -Dmaven.javadoc.skip=true -B -U -Prelease
 env:
   global:
   - secure: faSQQNYMoHGwnF4HkOLz4p1VMGOcKoBW5jQKHNAu7DHNQnjtGJ4SfMfO/x7VKGR0hmCBzB9CNDxzS8qeePOSpxZuHcjHfUEYPGPlYgPqstFCCZG7YDD/ia8P52p91RrsxFZ5lfJpIU7rj0rtkL9X82EC0f9FE6or/t+n6Ds2snJrwTrZ312mUvYHmsTjclykIL9C/WPOiqwYDOPMmvWx/dnlHHqy8a8+LuC7PhsyQ3JLve7UNTtvz5nWeOcmRhQR5B2+SmLN4PmMSsAnqq4rHxN0LWgfeq+O7NqHrOVAaZG+cHxLJsiePnnF2I6HFWUL+I15knnWXWVnMpPWeH4wzcxrPVSvqOrXidqXPqokn0Ax0T4fot550HHD+JRHm3FbqruNqszmMo/lMNxCLivSU8DioS16MtjVUZkuoJSgxYUiY660FTtkZmWw+42/344rM8ow/bGeaJFWk6Rc504gS5gVy8L8LwdczrdiYIJ47XBfCipDPNb8u1qxH12uxWT2qxlFwao5lTn9mNGCA0v/osMGoQSoVzGlFPq5EdJlzC4LfpATft7juhqDHB238lA3is10PINxmIRhTmwGPIJau92M03Muy0bKkMfxWhiiWniTa//6nr3wE8FtA45knby3KjAZ+O3YcZF6rRItHrXdgNUXZm9qGcbTYX9F7eNNceU=
