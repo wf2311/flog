@@ -1,13 +1,16 @@
 package com.wf2311.log;
 
+import org.aspectj.lang.annotation.Aspect;
+
 import java.util.Collections;
 import java.util.List;
 
 /**
  * @author wf2311
- * @time 2017/04/17 13:03.
+ * @date  2017/04/17 13:03.
  */
-public class DefaultLogAspect extends LogAspect {
+@Aspect
+public class DefaultLogAspect extends AbstractLogAspect {
     /**
      * 修记录信息
      */

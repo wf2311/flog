@@ -5,7 +5,6 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartRequest;
@@ -24,7 +23,7 @@ import static java.time.temporal.ChronoUnit.NANOS;
  * @author wf2311
  * @date 2016/06/03 17:11.
  */
-public abstract class LogAspect {
+public abstract class AbstractLogAspect {
     /**
      * 方法开始执行时间
      */
@@ -38,7 +37,7 @@ public abstract class LogAspect {
      * 日志切入点
      */
     @Resource
-    private Record record;
+    private LogRecord record;
 
     protected LogInfo logInfo;
 
@@ -219,7 +218,7 @@ public abstract class LogAspect {
 
 
     private Object paramsMap(Method method, Class clazz, ProceedingJoinPoint joinPoint) {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>(2);
         params.put("type", method.getParameterTypes());
         try {
             params.put("value", resolveArgs(joinPoint.getArgs()));

@@ -7,7 +7,7 @@ package com.wf2311.log;
  * @author wf2311
  * @date 2016/06/03 17:08.
  */
-public interface Record {
+public interface LogRecord {
 
     /**
      * 保存日志信息

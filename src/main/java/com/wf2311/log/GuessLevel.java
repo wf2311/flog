@@ -2,10 +2,13 @@
 package com.wf2311.log;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author wf2311
+ * @time 2016/12/15 00:20.
  */
 public class GuessLevel {
     /**
@@ -19,40 +22,28 @@ public class GuessLevel {
     private static List<String> register = Arrays.asList("register");
     private static List<String> logout = Arrays.asList("logout");
 
+    private static Map<Level, List<String>> listMap = new HashMap<>(8);
+
+    static {
+        listMap.put(Level.INSERT, insert);
+        listMap.put(Level.DELETE, delete);
+        listMap.put(Level.UPDATE, update);
+        listMap.put(Level.SELECT, select);
+        listMap.put(Level.LOGIN, login);
+        listMap.put(Level.REGISTER, register);
+        listMap.put(Level.LOGOUT, login);
+    }
+
     private static boolean match(String methodName, List<String> target) {
-        return target.stream().anyMatch(t -> t.equalsIgnoreCase(methodName));
+
+        return target.stream().anyMatch(s -> methodName.toLowerCase().startsWith(s.toLowerCase()));
     }
 
     public static Level guess(String methodName) {
-        if (match(methodName, insert)) {
-            return Level.INSERT;
-        }
-
-        if (match(methodName, delete)) {
-            return Level.DELETE;
-        }
-
-        if (match(methodName, update)) {
-            return Level.UPDATE;
-        }
-
-        if (match(methodName, select)) {
-            return Level.SELECT;
-        }
-
-        if (match(methodName, login)) {
-            return Level.LOGIN;
-        }
-
-        if (match(methodName, register)) {
-            return Level.REGISTER;
-        }
-
-        if (match(methodName, logout)) {
-            return Level.LOGOUT;
-        }
-        return Level.UNDEFINED;
-
+        return listMap.entrySet().stream()
+                .filter(e -> match(methodName, e.getValue()))
+                .map(Map.Entry::getKey)
+                .findFirst().orElse(Level.UNDEFINED);
     }
 
 }
