@@ -14,7 +14,7 @@ install:
   - mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dadditionalparam=-Xdoclint:none -Dmaven.javadoc.skip=true -B -V
 script:
   - mvn clean deploy --settings .maven.xml -DskipTests=true -Dadditionalparam=-Xdoclint:none -Dmaven.javadoc.skip=true -B -U -Prelease
-  - ./spring-boot-starter-flog/
+  - cd ./spring-boot-starter-flog/
   - mvn clean deploy --settings ../.maven.xml -DskipTests=true -Dadditionalparam=-Xdoclint:none -Dmaven.javadoc.skip=true -B -U -Prelease
 env:
   global:
